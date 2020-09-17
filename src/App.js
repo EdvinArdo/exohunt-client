@@ -1,26 +1,42 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Map from "./Map";
+import {openWebSocket} from "./websocket";
+import {handleKeyEvent} from "./keyEventHandler";
+import Login from "./Login";
+import {connect} from "react-redux";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const mapStateToProps = state => {
+    return {loggedIn: state.loggedIn};
 }
 
+class App extends React.Component {
+    componentDidMount() {
+        openWebSocket();
+    }
+
+    render() {
+        return (
+            <div style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+                backgroundColor: '#A0A0A0',
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}
+                 onKeyDown={handleKeyEvent}
+                 tabIndex={0}>
+                {this.props.loggedIn ?
+                    <Map/> :
+                    <Login/>}
+            </div>
+        );
+    }
+}
+
+App = connect(mapStateToProps)(App);
 export default App;
