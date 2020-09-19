@@ -1,5 +1,15 @@
-import {sendOnWebSocket} from "./websocket";
+import {move} from "./websocket";
+
+const keyToDirection = {
+    'ArrowLeft': 'left',
+    'ArrowRight': 'right',
+    'ArrowUp': 'up',
+    'ArrowDown': 'down',
+}
 
 export function handleKeyEvent(event) {
-    // sendOnWebSocket(event.key);
+    if (keyToDirection[event.key]) {
+        move(keyToDirection[event.key]);
+
+    }
 }

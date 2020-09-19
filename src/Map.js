@@ -1,5 +1,7 @@
 import React from 'react';
 import {loadImages} from "./images";
+import {tiles} from "./tiles";
+import {connect} from "react-redux";
 
 const tile = {
     width: 64,
@@ -11,23 +13,28 @@ const map = {
     height: 11,
 };
 
-export default class Map extends React.Component {
+const mapStateToProps = state => {
+    return {
+        map: state.map,
+    };
+}
+
+class Map extends React.Component {
     constructor(props) {
         super(props);
-        const tiles = new Array(map.width).map(row => new Array(map.height));
-        this.state = {
-            tiles: tiles,
-        };
         this.canvas = React.createRef();
     }
 
     async componentDidMount() {
-        const context = this.canvas.current.getContext('2d');
-        const images = await loadImages(['grass']);
+        const images = await loadImages(Object.values(tiles));
+        this.setState({images: images});
+    }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        const context = this.canvas.current.getContext('2d');
         for (let y = 0; y < map.height; y++) {
             for (let x = 0; x < map.width; x++) {
-                context.drawImage(images['grass'], x * tile.width, y * tile.height, tile.width, tile.height);
+                context.drawImage(this.state.images[tiles[this.props.map[y][x]]], x * tile.width, y * tile.height, tile.width, tile.height);
             }
         }
     }
@@ -41,3 +48,6 @@ export default class Map extends React.Component {
         );
     }
 }
+
+Map = connect(mapStateToProps)(Map);
+export default Map;

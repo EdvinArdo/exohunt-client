@@ -1,44 +1,68 @@
-import store, {login} from "./store";
+import store, {loginCharStore, loginStore, moveStore} from "./store";
+import {webSocketHost} from "./config";
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
 let client;
 
 export function openWebSocket() {
-    client = new W3CWebSocket('ws://localhost:8080/', 'exohunt-protocol');
+    client = new W3CWebSocket(`wss://${webSocketHost}`, 'exohunt-protocol');
 
     client.onerror = error => {
         console.log('Connection Error:', error);
     };
 
-    client.onmessage = message => {
-        const data = JSON.parse(message.data);
-        if (data.type === 'error') {
-            console.error(data.error);
+    client.onmessage = messageJSON => {
+        const message = JSON.parse(messageJSON.data);
+        if (message.status === 'error') {
+            console.error(message.data);
         } else {
-            if (data.type === 'event') {
-                if (data.event === 'login') {
-                    store.dispatch(login(data.status));
-                } else {
-                    console.error('Unknown event:', data.event);
-                }
+            if (message.event === 'login') {
+                store.dispatch(loginStore(message.data));
+            } else if (message.event === 'loginChar') {
+                store.dispatch(loginCharStore(message.data));
+            } else if (message.event === 'move') {
+                store.dispatch(moveStore(message.data))
             } else {
-                console.error('Unknown type:', data.type);
+                console.error('Unknown event:', message.event);
             }
         }
     };
 }
 
-export function sendOnWebSocket(data) {
+export function sendOnWebSocket(message) {
     if (!client) {
-        throw 'Websocket has not been opened';
+        throw new Error('Websocket has not been opened');
     }
-    client.send(JSON.stringify(data));
+    client.send(JSON.stringify(message));
 }
 
-export function tryLogin() {
-    const data = {
-        type: 'event',
+export function tryLogin(username, password) {
+    const message = {
         event: 'login',
+        data: {
+            username: username,
+            password: password,
+        },
     };
-    sendOnWebSocket(data);
+    sendOnWebSocket(message);
+}
+
+export function loginChar(charName) {
+    const message = {
+        event: 'loginChar',
+        data: {
+            charName: charName,
+        },
+    };
+    sendOnWebSocket(message);
+}
+
+export function move(direction) {
+    const message = {
+        event: 'move',
+        data: {
+            dir: direction,
+        },
+    };
+    sendOnWebSocket(message);
 }

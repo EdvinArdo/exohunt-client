@@ -4,9 +4,13 @@ import {openWebSocket} from "./websocket";
 import {handleKeyEvent} from "./keyEventHandler";
 import Login from "./Login";
 import {connect} from "react-redux";
+import CharLogin from "./LoginChar";
 
 const mapStateToProps = state => {
-    return {loggedIn: state.loggedIn};
+    return {
+        loggedIn: state.loggedIn,
+        char: state.char,
+    };
 }
 
 class App extends React.Component {
@@ -28,10 +32,11 @@ class App extends React.Component {
                 justifyContent: 'center',
                 alignItems: 'center',
             }}
-                 onKeyDown={handleKeyEvent}
+                 onKeyDown={this.props.char ? handleKeyEvent : null}
                  tabIndex={0}>
                 {this.props.loggedIn ?
-                    <Map/> :
+                    this.props.char ? <Map/> :
+                        <CharLogin/> :
                     <Login/>}
             </div>
         );

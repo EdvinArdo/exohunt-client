@@ -4,7 +4,7 @@ export function loadImages(imagefiles) {
         const total = imagefiles.length;
         const images = {};
 
-        for (let i = 0; i < imagefiles.length; i++) {
+        imagefiles.forEach(imagefile => {
             const image = new Image();
             image.onload = () => {
                 count++;
@@ -12,8 +12,8 @@ export function loadImages(imagefiles) {
                     resolve(images);
                 }
             };
-            image.src = './' + imagefiles[i] + '.png';
-            images[imagefiles[i]] = image;
-        }
+            image.src = './' + imagefile + '.png';
+            images[imagefile] = image;
+        })
     })
 }
