@@ -1,4 +1,4 @@
-import store, {loginCharStore, loginStore, moveStore} from "./store";
+import store, {loginCharStore, loginStore, mapStore, moveStore} from "./store";
 import {webSocketHost} from "./config";
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
@@ -19,9 +19,11 @@ export function openWebSocket() {
             if (message.event === 'login') {
                 store.dispatch(loginStore(message.data));
             } else if (message.event === 'loginChar') {
-                store.dispatch(loginCharStore(message.data));
+                store.dispatch(mapStore(message.data.map));
+                store.dispatch(loginCharStore(message.data.char));
             } else if (message.event === 'move') {
-                store.dispatch(moveStore(message.data))
+                store.dispatch(mapStore(message.data.map));
+                store.dispatch(moveStore(message.data.location));
             } else {
                 console.error('Unknown event:', message.event);
             }

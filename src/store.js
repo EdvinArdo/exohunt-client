@@ -1,13 +1,14 @@
 import {createStore} from "redux";
+import {Map} from 'immutable';
 
 const store = createStore(loginReducer);
-
 export default store;
 
 function loginReducer(state = {
                           loggedIn: false,
                           sessID: null,
                           char: null,
+                          map: Map(),
                       },
                       action) {
     const payload = action.payload;
@@ -27,8 +28,25 @@ function loginReducer(state = {
         case 'LOGIN_CHAR':
             return {
                 ...state,
-                char: payload.char,
-                map: payload.map.map,
+                char: payload,
+            };
+        case 'MAP':
+            let map = state.map;
+            payload.map.forEach((row, dy) => {
+                const y = dy + payload.y;
+                let mapRow = map.get(y);
+                if (!mapRow) {
+                    mapRow = Map();
+                }
+                row.forEach((tile, dx) => {
+                    const x = dx + payload.x;
+                    mapRow = mapRow.set(x, tile);
+                });
+                map = map.set(y, mapRow);
+            });
+            return {
+                ...state,
+                map: map,
             };
         case 'LOGOUT_CHAR':
             return {
@@ -40,9 +58,8 @@ function loginReducer(state = {
                 ...state,
                 char: {
                     ...state.char,
-                    location: payload.location,
+                    location: payload,
                 },
-                map: payload.map.map,
             };
         default:
             return state;
@@ -59,4 +76,8 @@ export function loginCharStore(payload) {
 
 export function moveStore(payload) {
     return {type: 'MOVE', payload: payload};
+}
+
+export function mapStore(payload) {
+    return {type: 'MAP', payload: payload};
 }
