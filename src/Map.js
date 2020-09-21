@@ -2,7 +2,8 @@ import React from 'react';
 import {loadImages} from "./images";
 import {tiles} from "./tiles";
 import {connect} from "react-redux";
-import store, {animateMoveFinishStore} from "./store";
+import store, {animateMoveFinishStore, animateMoveStore} from "./store";
+import {move} from "./websocket";
 
 const TILE_WIDTH = 64;
 const TILE_HEIGHT = 64;
@@ -18,6 +19,7 @@ const mapStateToProps = state => {
         x: state.char.location.x - ((MAP_WIDTH - 1) / 2),
         y: state.char.location.y - ((MAP_HEIGHT - 1) / 2),
         moving: state.moving,
+        queuedMove: state.queuedMove,
     };
 }
 
@@ -51,6 +53,12 @@ class Map extends React.Component {
     }
 
     gameLoop() {
+        if (this.props.queuedMove && this.props.moving.animationDone && this.props.moving.serverDone) {
+            move(this.props.queuedMove);
+            store.dispatch(animateMoveStore(this.props.queuedMove));
+        }
+
+
         const context = this.canvas.current.getContext('2d');
 
         this.stepAnimation();

@@ -13,7 +13,8 @@ function loginReducer(state = {
                               direction: 'right',
                               animationDone: true,
                               serverDone: true,
-                          }
+                          },
+                          queuedMove: null,
                       },
                       action) {
     const payload = action.payload;
@@ -87,6 +88,7 @@ function loginReducer(state = {
                     animationDone: false,
                     serverDone: false,
                 },
+                queuedMove: null,
             };
         case 'ANIMATE_MOVE_FINISH':
             return {
@@ -96,6 +98,12 @@ function loginReducer(state = {
                     animationDone: true,
                 },
             };
+        case 'QUEUE_MOVE':
+            return {
+                ...state,
+                queuedMove: payload,
+            };
+
         default:
             return state;
     }
@@ -127,4 +135,8 @@ export function animateMoveStore(payload) {
 
 export function animateMoveFinishStore(payload) {
     return {type: 'ANIMATE_MOVE_FINISH', payload: payload};
+}
+
+export function queueMoveStore(payload) {
+    return {type: 'QUEUE_MOVE', payload: payload};
 }

@@ -1,5 +1,4 @@
-import {move} from "./websocket";
-import store, {animateMoveStore} from "./store";
+import store, {queueMoveStore} from "./store";
 
 const keyToDirection = {
     'ArrowLeft': 'left',
@@ -10,9 +9,7 @@ const keyToDirection = {
 
 export function handleKeyEvent(event) {
     const direction = keyToDirection[event.key];
-    const state = store.getState();
-    if (direction && state.moving.animationDone && state.moving.serverDone) {
-        move(direction);
-        store.dispatch(animateMoveStore(direction));
+    if (direction) {
+        store.dispatch(queueMoveStore(direction));
     }
 }
