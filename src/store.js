@@ -9,6 +9,11 @@ function loginReducer(state = {
                           sessID: null,
                           char: null,
                           map: Map(),
+                          moving: {
+                              direction: 'right',
+                              animationDone: true,
+                              serverDone: true,
+                          }
                       },
                       action) {
     const payload = action.payload;
@@ -60,6 +65,36 @@ function loginReducer(state = {
                     ...state.char,
                     location: payload,
                 },
+                moving: {
+                    ...state.moving,
+                    serverDone: true,
+                },
+            };
+        case 'NO_MOVE':
+            return {
+                ...state,
+                moving: {
+                    ...state.moving,
+                    serverDone: true,
+                },
+            };
+
+        case 'ANIMATE_MOVE':
+            return {
+                ...state,
+                moving: {
+                    direction: payload,
+                    animationDone: false,
+                    serverDone: false,
+                },
+            };
+        case 'ANIMATE_MOVE_FINISH':
+            return {
+                ...state,
+                moving: {
+                    ...state.moving,
+                    animationDone: true,
+                },
             };
         default:
             return state;
@@ -78,6 +113,18 @@ export function moveStore(payload) {
     return {type: 'MOVE', payload: payload};
 }
 
+export function noMoveStore(payload) {
+    return {type: 'NO_MOVE', payload: payload};
+}
+
 export function mapStore(payload) {
     return {type: 'MAP', payload: payload};
+}
+
+export function animateMoveStore(payload) {
+    return {type: 'ANIMATE_MOVE', payload: payload};
+}
+
+export function animateMoveFinishStore(payload) {
+    return {type: 'ANIMATE_MOVE_FINISH', payload: payload};
 }
