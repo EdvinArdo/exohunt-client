@@ -79,7 +79,30 @@ function loginReducer(state = {
                     serverDone: true,
                 },
             };
+        case 'ENTITY_MOVE':
+            const x = payload.entity.location.x;
+            const y = payload.entity.location.y;
+            const oldX = payload.oldLocation.x;
+            const oldY = payload.oldLocation.y;
+            // const newTile = {
+            //     ...state.map.get(y).get(x),
+            //     entity: payload.entity,
+            // };
+            // const newRow = state.map.get(y).set(x, newTile);
+            // const newMap = state.map.set(y, newRow);
 
+            const newMap = state.map.updateIn([y, x], tile => {
+                return {
+                    tile: tile.tile,
+                    entity: payload.entity,
+                };
+            }).updateIn([oldY, oldX], tile => {
+                return {tile: tile.tile};
+            });
+            return {
+                ...state,
+                map: newMap,
+            };
         case 'ANIMATE_MOVE':
             return {
                 ...state,
@@ -123,6 +146,10 @@ export function moveStore(payload) {
 
 export function noMoveStore(payload) {
     return {type: 'NO_MOVE', payload: payload};
+}
+
+export function entityMove(payload) {
+    return {type: 'ENTITY_MOVE', payload: payload};
 }
 
 export function mapStore(payload) {

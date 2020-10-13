@@ -68,7 +68,11 @@ class Map extends React.Component {
 
         for (let y = 0; y < MAP_HEIGHT; y++) {
             for (let x = 0; x < MAP_WIDTH; x++) {
-                context.drawImage(this.state.images[tiles[this.map.get(y + this.y).get(x + this.x)]], (x - 1) * TILE_WIDTH + Math.floor(this.offsetX), (y - 1) * TILE_HEIGHT + Math.floor(this.offsetY), TILE_WIDTH, TILE_HEIGHT);
+                const tile = this.map.get(y + this.y).get(x + this.x);
+                context.drawImage(this.state.images[tiles[tile.tile]], (x - 1) * TILE_WIDTH + Math.floor(this.offsetX), (y - 1) * TILE_HEIGHT + Math.floor(this.offsetY), TILE_WIDTH, TILE_HEIGHT);
+                if (tile.entity) {
+                    context.fillRect((x - 1) * TILE_WIDTH + Math.floor(this.offsetX), (y - 1) * TILE_HEIGHT + Math.floor(this.offsetY), TILE_WIDTH, TILE_HEIGHT);
+                }
             }
         }
 
