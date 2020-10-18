@@ -1,5 +1,5 @@
-export const tiles = {
-    0: 'grass',
-    1: 'stone',
-    2: 'water',
-};
+export const tiles = [
+    'grass-tile',
+    'water-tile',
+    'stone-tile',
+];

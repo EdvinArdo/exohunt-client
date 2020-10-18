@@ -1,23 +1,7 @@
 import React from 'react';
-import Map from "./Map";
-import {openWebSocket} from "./websocket";
-import {handleKeyEvent} from "./keyEventHandler";
-import Login from "./Login";
-import {connect} from "react-redux";
-import CharLogin from "./LoginChar";
-
-const mapStateToProps = state => {
-    return {
-        loggedIn: state.loggedIn,
-        char: state.char,
-    };
-}
+import Game from "./Game";
 
 class App extends React.Component {
-    componentDidMount() {
-        openWebSocket();
-    }
-
     render() {
         return (
             <div style={{
@@ -31,17 +15,11 @@ class App extends React.Component {
                 flexDirection: 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
-            }}
-                 onKeyDown={this.props.char ? handleKeyEvent : null}
-                 tabIndex={0}>
-                {this.props.loggedIn ?
-                    this.props.char ? <Map/> :
-                        <CharLogin/> :
-                    <Login/>}
+            }}>
+                <Game/>
             </div>
         );
     }
 }
 
-App = connect(mapStateToProps)(App);
 export default App;
