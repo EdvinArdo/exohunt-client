@@ -51,7 +51,6 @@ class Game extends React.Component {
 
         this.ws.onmessage = messageJSON => {
             const message = JSON.parse(messageJSON.data);
-            console.log(message);
 
             this.map = message.map;
         };
@@ -97,7 +96,7 @@ class Game extends React.Component {
             for (let x = 0; x < MAP_WIDTH; x++) {
                 const tile = this.map[y][x];
                 context.drawImage(this.state.images[tile.id], (x - 1) * TILE_WIDTH + Math.floor(this.offsetX), (y - 1) * TILE_HEIGHT + Math.floor(this.offsetY), TILE_WIDTH, TILE_HEIGHT);
-                if (tile.entity) {
+                if (typeof tile.entity === "number") {
                     context.fillRect((x - 1) * TILE_WIDTH + Math.floor(this.offsetX), (y - 1) * TILE_HEIGHT + Math.floor(this.offsetY), TILE_WIDTH, TILE_HEIGHT);
                 }
             }
