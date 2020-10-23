@@ -31,6 +31,9 @@ class Game extends React.Component {
         this.handleKeyEvent = this.handleKeyEvent.bind(this);
         this.sendOnWebSocket = this.sendOnWebSocket.bind(this);
         this.sendMove = this.sendMove.bind(this);
+        this.animateMove = this.animateMove.bind(this);
+        this.isMoving = this.isMoving.bind(this);
+        this.updateAnimations = this.updateAnimations.bind(this);
         this.offsetX = 0;
         this.offsetY = 0;
     }
@@ -53,11 +56,17 @@ class Game extends React.Component {
             const message = JSON.parse(messageJSON.data);
 
             this.map = message.map;
+            this.character = message.character;
+            if (message.events) {
+                // console.log(message.events[0].direction);
+                this.animateMove(message.events[0].direction)
+            }
         };
     }
 
     gameLoop() {
         if (this.map) {
+            this.updateAnimations();
             this.draw();
         }
         window.requestAnimationFrame(this.gameLoop);
@@ -87,20 +96,63 @@ class Game extends React.Component {
         this.sendOnWebSocket(message);
     }
 
+    animateMove(direction) {
+        if (direction === "left") {
+            this.offsetX = -TILE_WIDTH;
+        } else if (direction === "right") {
+            this.offsetX = TILE_WIDTH;
+        } else if (direction === "up") {
+            this.offsetY = -TILE_HEIGHT;
+        } else if (direction === "down") {
+            this.offsetY = TILE_HEIGHT;
+        }
+    }
+
+    updateAnimations() {
+        if (Math.abs(this.offsetX) < 2.5) {
+            this.offsetX = 0;
+        }
+        if (Math.abs(this.offsetY) < 2.5) {
+            this.offsetY = 0;
+        }
+
+
+        if (this.offsetX > 0) {
+            this.offsetX -= 2.5;
+        }
+        if (this.offsetX < 0) {
+            this.offsetX += 2.5;
+        }
+        if (this.offsetY > 0) {
+            this.offsetY -= 2.5;
+        }
+        if (this.offsetY < 0) {
+            this.offsetY += 2.5;
+        }
+    }
+
+    isMoving() {
+        return this.offsetX !== 0 || this.offsetY !== 0;
+    }
+
     draw() {
         const context = this.canvas.current.getContext('2d');
         context.fillStyle = '#FFFFFF';
         context.fillRect(0, 0, MAP_WIDTH * TILE_WIDTH, MAP_HEIGHT * TILE_HEIGHT);
 
+        // Draw map
         for (let y = 0; y < MAP_HEIGHT; y++) {
             for (let x = 0; x < MAP_WIDTH; x++) {
                 const tile = this.map[y][x];
                 context.drawImage(this.state.images[tile.id], (x - 1) * TILE_WIDTH + Math.floor(this.offsetX), (y - 1) * TILE_HEIGHT + Math.floor(this.offsetY), TILE_WIDTH, TILE_HEIGHT);
-                if (typeof tile.entity === "number") {
+                if (typeof tile.entity === "number" && tile.entity !== this.character.id) {
                     context.fillRect((x - 1) * TILE_WIDTH + Math.floor(this.offsetX), (y - 1) * TILE_HEIGHT + Math.floor(this.offsetY), TILE_WIDTH, TILE_HEIGHT);
                 }
             }
         }
+
+        // Draw self
+        context.fillRect(((MAP_WIDTH - 3) / 2) * TILE_WIDTH, ((MAP_HEIGHT - 3) / 2) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
     }
 
     render() {
