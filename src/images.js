@@ -1,10 +1,10 @@
-export function loadImages(imagefiles) {
+export function loadImages(imageFiles) {
     return new Promise((resolve, reject) => {
         let count = 0;
-        const total = imagefiles.length;
+        const total = imageFiles.length;
         const images = {};
 
-        imagefiles.forEach(imagefile => {
+        imageFiles.forEach(imagefile => {
             const image = new Image();
             image.onload = () => {
                 count++;
@@ -17,3 +17,10 @@ export function loadImages(imagefiles) {
         })
     })
 }
+
+export const imageFiles = [
+    'grass-tile',
+    'water-tile',
+    'stone-tile',
+    'character',
+];

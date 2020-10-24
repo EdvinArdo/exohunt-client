@@ -1,6 +1,6 @@
 import React from 'react';
 import {loadImages} from "./images";
-import {tiles} from "./tiles";
+import {imageFiles} from "./images";
 import {webSocketHost} from "./config";
 
 const W3CWebSocket = require('websocket').w3cwebsocket;
@@ -34,12 +34,12 @@ class Game extends React.Component {
         this.animateMove = this.animateMove.bind(this);
         this.isMoving = this.isMoving.bind(this);
         this.updateAnimations = this.updateAnimations.bind(this);
-        this.offsetX = 0;
-        this.offsetY = 0;
+        this.moveAnimation = 0;
+        this.moveDirection = 'down';
     }
 
     async componentDidMount() {
-        const images = await loadImages(tiles);
+        const images = await loadImages(imageFiles);
         this.setState({images: images});
         this.openWebSocket();
         window.requestAnimationFrame(this.gameLoop);
@@ -97,42 +97,18 @@ class Game extends React.Component {
     }
 
     animateMove(direction) {
-        if (direction === "left") {
-            this.offsetX = -TILE_WIDTH;
-        } else if (direction === "right") {
-            this.offsetX = TILE_WIDTH;
-        } else if (direction === "up") {
-            this.offsetY = -TILE_HEIGHT;
-        } else if (direction === "down") {
-            this.offsetY = TILE_HEIGHT;
-        }
+        this.moveAnimation = 20;
+        this.moveDirection = direction;
     }
 
     updateAnimations() {
-        if (Math.abs(this.offsetX) < 2.5) {
-            this.offsetX = 0;
-        }
-        if (Math.abs(this.offsetY) < 2.5) {
-            this.offsetY = 0;
-        }
-
-
-        if (this.offsetX > 0) {
-            this.offsetX -= 2.5;
-        }
-        if (this.offsetX < 0) {
-            this.offsetX += 2.5;
-        }
-        if (this.offsetY > 0) {
-            this.offsetY -= 2.5;
-        }
-        if (this.offsetY < 0) {
-            this.offsetY += 2.5;
+        if (this.moveAnimation > 0) {
+            this.moveAnimation--;
         }
     }
 
     isMoving() {
-        return this.offsetX !== 0 || this.offsetY !== 0;
+        return this.moveAnimation > 0;
     }
 
     draw() {
@@ -140,19 +116,36 @@ class Game extends React.Component {
         context.fillStyle = '#FFFFFF';
         context.fillRect(0, 0, MAP_WIDTH * TILE_WIDTH, MAP_HEIGHT * TILE_HEIGHT);
 
+        let offsetX = 0, offsetY = 0;
+        if (this.moveAnimation > 0) {
+            if (this.moveDirection === 'left') {
+                offsetX = this.moveAnimation / 20 * -TILE_WIDTH;
+            } else if (this.moveDirection === 'right') {
+                offsetX = this.moveAnimation / 20 * TILE_WIDTH;
+            } else if (this.moveDirection === 'up') {
+                offsetY = this.moveAnimation / 20 * -TILE_HEIGHT;
+            } else if (this.moveDirection === 'down') {
+                offsetY = this.moveAnimation / 20 * TILE_HEIGHT;
+            }
+        }
+
         // Draw map
         for (let y = 0; y < MAP_HEIGHT; y++) {
             for (let x = 0; x < MAP_WIDTH; x++) {
                 const tile = this.map[y][x];
-                context.drawImage(this.state.images[tile.id], (x - 1) * TILE_WIDTH + Math.floor(this.offsetX), (y - 1) * TILE_HEIGHT + Math.floor(this.offsetY), TILE_WIDTH, TILE_HEIGHT);
+                context.drawImage(this.state.images[tile.id], (x - 1) * TILE_WIDTH + Math.floor(offsetX), (y - 1) * TILE_HEIGHT + Math.floor(offsetY), TILE_WIDTH, TILE_HEIGHT);
                 if (typeof tile.entity === "number" && tile.entity !== this.character.id) {
-                    context.fillRect((x - 1) * TILE_WIDTH + Math.floor(this.offsetX), (y - 1) * TILE_HEIGHT + Math.floor(this.offsetY), TILE_WIDTH, TILE_HEIGHT);
+                    context.drawImage(this.state.images['character'], 0, 0, 32, 32, (x - 1) * TILE_WIDTH + Math.floor(offsetX), (y - 1) * TILE_HEIGHT + Math.floor(offsetY), TILE_WIDTH, TILE_HEIGHT);
+                }
+                if (typeof tile.entity === "object") {
+                    context.fillRect((x - 1) * TILE_WIDTH + Math.floor(offsetX), (y - 1) * TILE_HEIGHT + Math.floor(offsetY), TILE_WIDTH, TILE_HEIGHT);
                 }
             }
         }
 
         // Draw self
-        context.fillRect(((MAP_WIDTH - 3) / 2) * TILE_WIDTH, ((MAP_HEIGHT - 3) / 2) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
+        context.drawImage(this.state.images['character'], (this.moveAnimation % 4) * 32, 0, 32, 32, ((MAP_WIDTH - 3) / 2) * TILE_WIDTH, ((MAP_HEIGHT - 3) / 2) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
+        // context.fillRect(((MAP_WIDTH - 3) / 2) * TILE_WIDTH, ((MAP_HEIGHT - 3) / 2) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT)
     }
 
     render() {
